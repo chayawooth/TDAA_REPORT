@@ -1,0 +1,88 @@
+GET _search
+{
+  "version": true,
+  "size": 5000,
+  "sort": [
+    {
+      "@timestamp": {
+        "order": "desc",
+        "unmapped_type": "boolean"
+      }
+    }
+  ],
+  "aggs": {
+    "2": {
+      "date_histogram": {
+        "field": "@timestamp",
+        "fixed_interval": "30s",
+        "time_zone": "Asia/Bangkok",
+        "min_doc_count": 1
+      }
+    }
+  },
+  "stored_fields": [
+    "*"
+  ],
+  "script_fields": {},
+  "docvalue_fields": [
+    {
+      "field": "@timestamp",
+      "format": "date_time"
+    },
+    {
+      "field": "begin_date",
+      "format": "date_time"
+    }
+  ],
+  "_source": {
+    "excludes": []
+  },
+  "query": {
+    "bool": {
+      "must": [],
+      "filter": [
+        {
+          "match_all": {}
+        },
+        {
+          "match_phrase": {
+            "function": "pull-check-airtime"
+          }
+        },
+        {
+          "match_phrase": {
+            "app": "pull-check-airtime"
+          }
+        },
+        {
+          "match_phrase": {
+            "kafka.in.topic": "tdaa.ussd.pull.airtime"
+          }
+        },
+        {
+          "range": {
+            "@timestamp": {
+              "gte": "2022-06-26T15:19:39.677Z",
+              "lte": "2022-06-26T15:49:39.677Z",
+              "format": "strict_date_optional_time"
+            }
+          }
+        }
+      ],
+      "should": [],
+      "must_not": []
+    }
+  },
+  "highlight": {
+    "pre_tags": [
+      "@kibana-highlighted-field@"
+    ],
+    "post_tags": [
+      "@/kibana-highlighted-field@"
+    ],
+    "fields": {
+      "*": {}
+    },
+    "fragment_size": 2147483647
+  }
+}
